@@ -5,6 +5,10 @@ on:
     branches:  
       - main  # Trigger on pushes to main branch  
 
-jobs:  
-  deploy:  
-    runs-on: ubuntu-latest  
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency: production
+    steps:
+      - name: deploy
