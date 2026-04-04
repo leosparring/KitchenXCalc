@@ -548,35 +548,11 @@ app_ui = ui.page_fluid(
             )
         ),
         ui.div(
-            {"class": "btn-add-wrapper", "style": "display:flex;align-items:center;gap:12px;"},
+            {"class": "btn-add-wrapper"},
             ui.input_action_button(
                 "add_appliance",
                 ui.HTML("+ &nbsp; Add Another Hazard"),
                 class_="btn-add",
-            ),
-            ui.tags.button(
-                "⬇ Save as PDF",
-                onclick="window.print()",
-                class_="btn-pdf",
-            ),
-            ui.tags.button(
-                "⬇ Save System Summary",
-                onclick="""
-                    var el = document.querySelector('.summary-card');
-                    if (!el) return;
-                    var w = window.open('', '_blank');
-                    w.document.write('<html><head><title>System Summary</title>');
-                    w.document.write('<style>');
-                    w.document.write(document.querySelector('style') ? document.querySelector('style').innerHTML : '');
-                    w.document.write('body{background:white;padding:24px;font-family:Barlow,sans-serif;}');
-                    w.document.write('</style></head><body>');
-                    w.document.write(el.outerHTML);
-                    w.document.write('</body></html>');
-                    w.document.close();
-                    w.focus();
-                    setTimeout(function(){ w.print(); }, 400);
-                """,
-                class_="btn-pdf",
             ),
         ),
         ui.output_ui("summary_panel"),
@@ -1968,6 +1944,33 @@ def server(input, output, session):
                 ),
             ),
             system_rec,
+            ui.div(
+                {"style": "display:flex;gap:10px;align-items:center;margin-top:14px;"},
+                ui.tags.button(
+                    "⬇ Save as PDF",
+                    onclick="window.print()",
+                    class_="btn-pdf",
+                ),
+                ui.tags.button(
+                    "⬇ Save System Summary",
+                    onclick="""
+                        var el = document.querySelector('.summary-card');
+                        if (!el) return;
+                        var w = window.open('', '_blank');
+                        w.document.write('<html><head><title>System Summary</title>');
+                        w.document.write('<style>');
+                        w.document.write(document.querySelector('style') ? document.querySelector('style').innerHTML : '');
+                        w.document.write('body{background:white;padding:24px;font-family:Barlow,sans-serif;}');
+                        w.document.write('</style></head><body>');
+                        w.document.write(el.outerHTML);
+                        w.document.write('</body></html>');
+                        w.document.close();
+                        w.focus();
+                        setTimeout(function(){ w.print(); }, 400);
+                    """,
+                    class_="btn-pdf",
+                ),
+            ),
         )
 
 
