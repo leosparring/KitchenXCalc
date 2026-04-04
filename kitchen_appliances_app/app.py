@@ -708,6 +708,7 @@ def compute_sections(w_mm, d_mm, max_area, max_side=None):
         if best and rows > best[4]:
             break
 
+
     if best is None:
         # Fallback: just divide each dimension by max_side
         cols = math.ceil(w_mm / (max_side or w_mm))
