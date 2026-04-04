@@ -701,7 +701,7 @@ def compute_sections(w_mm, d_mm, max_area, max_side=None):
             if cell_area <= max_area and side_ok:
                 total = rows * cols
                 # Prefer fewer sections; on tie prefer more rows (horizontal split)
-                if best is None or total < best[4] or (total == best[4] and rows > best[0]):
+                if best is None or total < best[4] or (total == best[4] and rows < best[0]):
                     best = (rows, cols, cw, cd, total)
                 break   # found valid cols for this rows
         # Stop only when current rows exceeds best total (can't improve further)
