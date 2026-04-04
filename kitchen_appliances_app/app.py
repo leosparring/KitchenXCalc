@@ -6,7 +6,6 @@ from shiny import App, ui, render, reactive
 _logo_path = Path(__file__).parent / "www" / "logo.png"
 _LOGO_SRC = "data:image/png;base64," + base64.b64encode(_logo_path.read_bytes()).decode()
 
-
 # input_type: "wl" = width+length, "d" = diameter only, "wl_drip" = width+length+drip board depth
 # typical_w / typical_d / typical_dia in mm; max_area in m²; max_side in mm (optional)
 # nozzle: nozzle spacing range string; flow: flow rate per nozzle
