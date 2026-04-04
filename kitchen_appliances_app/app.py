@@ -29,8 +29,8 @@ CSS = """
     :root {
         --red:        #E3000F;
         --red-dark:   #b50000;
-        --navy:       #1A2233;
-        --navy-mid:   #243044;
+        --navy:       #2b2a29;
+        --navy-mid:   #3d3c3b;
         --steel:      #3D4F6B;
         --silver:     #8A96A8;
         --light:      #F0F2F5;
