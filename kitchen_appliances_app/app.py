@@ -12,12 +12,12 @@ _LOGO_SRC = "data:image/png;base64," + base64.b64encode(_logo_path.read_bytes())
 # nozzle: nozzle spacing range string; flow: flow rate per nozzle
 APPLIANCES = {
     "Fryer":                   {"icon": "", "input_type": "wl",      "typical_w": 360, "typical_d": 380, "max_area": 0.137, "max_side": 380, "abs_max_area": 0.55, "nozzle": "2–30",  "flow": 2},
-    "Fryer with drip board":   {"icon": "", "input_type": "wl_drip", "typical_w": 360, "typical_d": 540, "typical_drip": 160, "max_area": None, "max_side": None, "max_area_body": 0.137, "max_side_body": 380, "max_area_drip": 0.1945, "max_side_drip": 540, "abs_max_area": 0.55, "nozzle": "2–30",  "flow": 2},
+    "Fryer with drip board":   {"icon": "", "input_type": "wl_drip", "typical_w": 360, "typical_d": 540, "typical_drip": 160, "max_area": None, "max_side": None, "max_area_body": 0.137, "max_side_body": 380, "max_area_drip": 0.194, "max_side_drip": 540, "abs_max_area": 0.55, "nozzle": "2–30",  "flow": 2},
     "Griddle":                 {"icon": "", "input_type": "wl",      "typical_w": 760, "typical_d": 760, "max_area": 0.578, "max_side": 760, "nozzle": "1–60",  "flow": 1},
     "Gas or electric broiler": {"icon": "", "input_type": "wl",      "typical_w": 901, "typical_d": 601, "max_area": 0.561, "max_side": 920, "nozzle": "1–60",  "flow": 1},
     "Range top":               {"icon": "", "input_type": "wl",      "typical_w": 640, "typical_d": 640, "max_area": None,  "distance": 270,   "nozzle": "2–60",  "flow": 2},
     "Wok":                     {"icon": "", "input_type": "d",       "typical_dia": 410,                 "max_area": 0.30,  "abs_max_dia": 410, "nozzle": "2–30",  "flow": 2},
-    "Tilt skillet":            {"icon": "", "input_type": "wl",      "typical_w": 700, "typical_d": 550, "max_area": 0.1945,                 "nozzle": "2–30",  "flow": 2},
+    "Tilt skillet":            {"icon": "", "input_type": "wl",      "typical_w": 700, "typical_d": 550, "max_area": 0.194,                 "nozzle": "2–30",  "flow": 2},
     "Circular duct":           {"icon": "", "input_type": "d",       "typical_dia": 404,                 "max_area": None, "max_dia": 404, "max_perim": 1270,  "nozzle": "1–110", "flow": 1},
     "Rectangular duct":        {"icon": "",  "input_type": "wl",      "typical_w": 211, "typical_d": 423, "max_area": None, "max_perim": 1270,                  "nozzle": "1–110", "flow": 1},
     "Plenum":                  {"icon": "", "input_type": "wl",      "typical_w": 600, "typical_d": 3000, "max_area": None, "max_width": 600, "max_length": 3000, "abs_max_width": 600, "nozzle": "1–60",  "flow": 1},
@@ -493,7 +493,7 @@ app_ui = ui.page_fluid(
         {"class": "app-wrapper"},
         ui.div(
             {"class": "header"},
-            ui.div({"style": "display:flex;align-items:center;gap:16px;margin-bottom:20px;"},ui.tags.img(src=_LOGO_SRC, alt="KitchenX", style="height:60px;display:block;"),ui.tags.span("Calculation Tool", style="font-family:'Barlow Condensed',sans-serif;font-size:60px;font-weight:600;color:var(--fg);letter-spacing:-0.01em;line-height:1;")),
+            ui.div({"style": "display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;"},ui.tags.img(src=_LOGO_SRC, alt="KitchenX", style="height:clamp(36px,8vw,60px);display:block;"),ui.tags.span("Calculation Tool", style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(28px,7vw,60px);font-weight:600;color:var(--fg);letter-spacing:-0.01em;line-height:1;")),
             
             ui.tags.p(
                 "Simplified system design for KitchenX"
@@ -774,27 +774,37 @@ def compute_sections_range_top_shelf(w_mm, d_mm, distance, shelf_height_mm, shel
             cw = w_mm / cols
             cd = d_mm / rows
 
-            # Step 1: minimum offset to clear shelf at the highest allowed nozzle (1020 mm)
-            min_offset = max(0.0, 1020 * tan_shelf - cd / 2)
+            # Step 1: minimum offset at the LOWEST nozzle height (690) — gives smallest offset,
+            # smallest effective depth, and therefore best (smallest) c.
+            # offset(h) = max(0, h * tan_shelf - cd/2) increases with h, so h=690 is best.
+            min_offset = max(0.0, 690 * tan_shelf - cd / 2)
 
             # Physically impossible: offset exceeds half the section depth
             if min_offset > cd / 2:
                 continue
 
-            # Step 2: c constraint at this offset
+            # Step 2: c check at h=690 (best possible c for this section).
+            # If it fails here no nozzle height can help — skip to more sections.
             if compute_c(cw, cd + 2 * min_offset) >= distance:
                 continue
 
-            # Step 3: maximum nozzle height where shelf is still cleared at min_offset
-            if tan_shelf > 0:
-                max_nozzle_h = min(1020, int((cd / 2 + min_offset) / tan_shelf) - 1)
-            else:
-                max_nozzle_h = 1020
+            # Step 3: find the maximum nozzle height where c is still satisfied.
+            # c(h) = compute_c(cw, cd + 2*offset(h)) increases with h.
+            # Binary-search or linear scan for largest h in [690, 1020] where c < distance.
+            max_nozzle_h = 690
+            for h in range(691, 1021):
+                off_h = max(0.0, h * tan_shelf - cd / 2)
+                if off_h > cd / 2:
+                    break
+                if compute_c(cw, cd + 2 * off_h) >= distance:
+                    break
+                max_nozzle_h = h
 
-            if max_nozzle_h < 690:
-                continue  # shelf blocks even at lowest allowed nozzle height
+            # The offset to use is the one at max_nozzle_h (smallest offset that still clears
+            # shelf at the chosen height — use the offset corresponding to max_nozzle_h)
+            best_offset = max(0.0, max_nozzle_h * tan_shelf - cd / 2)
 
-            return rows, cols, cw, cd, rows * cols, max_nozzle_h, min_offset
+            return rows, cols, cw, cd, rows * cols, max_nozzle_h, best_offset
 
     # Infeasible: no section layout can satisfy both shelf and c constraints
     return None
@@ -965,10 +975,14 @@ def nozzle_symbols_svg(cx, cy, cell_w_px, cell_h_px, appliance,
         if cell_w_mm > 260 and cell_h_mm > 260:
             stop_x = ox + 130 * mm_scale
             stop_y = oy + 130 * mm_scale
+            mid_x = (shifted_cx + stop_x) / 2 + 4
+            mid_y = (shifted_cy + stop_y) / 2 - 4
             c_line = (
                 f'<line x1="{shifted_cx:.1f}" y1="{shifted_cy:.1f}" '
                 f'x2="{stop_x:.1f}" y2="{stop_y:.1f}" '
                 f'stroke="white" stroke-width="1" stroke-dasharray="3 2" opacity="0.8"/>'
+                f'<text x="{mid_x:.1f}" y="{mid_y:.1f}" '
+                f'font-family="Barlow,sans-serif" font-size="8" fill="white" opacity="0.8">c</text>'
             )
         else:
             c_line = ""
@@ -1252,8 +1266,12 @@ def build_sections_svg(itype, vals, area_m2, max_area, rows=1, cols=1, needs_spl
                 )
                 cell_cx = x + cell_w_px / 2
                 cell_cy = y + cell_h_px / 2
-                # For Range top with shelf offset: shift nozzle symbol toward front (down in SVG)
-                _rt_scale_arg = complex((vals.get("_shelf_offset", 0) or 0) * scale, scale) if appliance == "Range top" else scale
+                # For Range top with shelf: only innermost row (r==0) gets offset
+                if appliance == "Range top":
+                    _row_offset = (vals.get("_shelf_offset", 0) or 0) if r == 0 else 0
+                    _rt_scale_arg = complex(_row_offset * scale, scale)
+                else:
+                    _rt_scale_arg = scale
                 nozzle_elements.append(nozzle_symbols_svg(cell_cx, cell_cy, cell_w_px, cell_h_px, appliance, x, y, _rt_scale_arg))
                 k += 1
 
@@ -1572,7 +1590,7 @@ def server(input, output, session):
                     abs_exceeded = True
 
             # ── Build SVG (skip if abs_max_width exceeded) ────────
-            svg_html = "" if abs_exceeded else build_sections_svg(itype, vals, area_m2, max_area, rows, cols, needs_split, appliance)
+            svg_html = "" if (abs_exceeded or (vals and vals.get("_shelf_infeasible"))) else build_sections_svg(itype, vals, area_m2, max_area, rows, cols, needs_split, appliance)
 
             # ── Build sections block ──────────────────────────────
             if needs_split:
@@ -1594,18 +1612,10 @@ def server(input, output, session):
                 _max_side  = info.get("max_side")
                 _max_perim = info.get("max_perim")
                 if _distance is not None:
-                    c_cell = compute_c(cell_w, cell_d)
-                    note_parts.append(f"c per section: {c_cell:.1f} mm  ·  Limit: {_distance} mm")
+                    _shelf_off_here = vals.get("_shelf_offset", 0) or 0
+                    c_cell = compute_c(cell_w, cell_d + 2 * _shelf_off_here) if _shelf_off_here else compute_c(cell_w, cell_d)
+                    note_parts.append(f"c: {c_cell:.1f} mm  ·  Limit: {_distance} mm")
                     _shelf_nozzle_h = vals.get("_shelf_nozzle_h") if itype != "d" else None
-                    if _shelf_nozzle_h is not None:
-                        _shelf_offset = vals.get("_shelf_offset", 0)
-                        _sh  = vals.get("shelf_height", 0)
-                        _soh = vals.get("shelf_overhang", 0)
-                        _sa  = math.degrees(math.atan2(_soh, _sh))
-                        _na  = math.degrees(math.atan2(cell_w / 2, _shelf_nozzle_h))
-                        note_parts.append(
-                            f"Shelf angle: {_sa:.1f}°  ·  Nozzle angle: {_na:.1f}°"
-                        )
                 elif info.get("max_width") is not None:
                     note_parts.append(f"Max width: {info['max_width']} mm  ·  Max length: {info['max_length']/1000:.0f} m")
                 elif _max_perim is not None and itype != "d":
@@ -1641,11 +1651,20 @@ def server(input, output, session):
                 if appliance == "Range top" and vals.get("_shelf_nozzle_h") is not None:
                     _nh  = vals["_shelf_nozzle_h"]
                     _off = vals.get("_shelf_offset", 0)
-                    _off_mm = round(_off)
+                    _from_inner = round(cell_d / 2 + _off)
+                    if round(_off) == 0:
+                        _pos_note = "Position the nozzle centrally above its section."
+                    elif rows > 1:
+                        _pos_note = (
+                            f"Position the innermost row of nozzles {_from_inner} mm from the inner (back) edge of the section "
+                            f"to maintain line of sight past the shelf. "
+                            f"All other nozzles should be placed centrally above their section."
+                        )
+                    else:
+                        _pos_note = f"Position the nozzle {_from_inner} mm from the inner (back) edge of the section to maintain line of sight past the shelf."
                     placement_text = (
                         f"Nozzle placed 690 to {_nh} mm above its section, aiming straight down. "
-                        f"Position the nozzle {_off_mm} mm forward of the section centre (toward the front) "
-                        f"to maintain line of sight past the shelf."
+                        f"{_pos_note}"
                     )
                 else:
                     placement_text = NOZZLE_PLACEMENT.get(appliance, "")
@@ -1668,15 +1687,6 @@ def server(input, output, session):
                     c_val    = compute_c(w_mm, d_mm) if itype != "d" else 0
                     ok_parts = [f"c = {c_val:.1f} mm  ·  Distance limit: {_distance} mm"]
                     _shelf_nozzle_h = vals.get("_shelf_nozzle_h")
-                    if _shelf_nozzle_h is not None:
-                        _shelf_offset = vals.get("_shelf_offset", 0)
-                        _sh  = vals.get("shelf_height", 0)
-                        _soh = vals.get("shelf_overhang", 0)
-                        _sa  = math.degrees(math.atan2(_soh, _sh))
-                        _na  = math.degrees(math.atan2(w_mm / 2, _shelf_nozzle_h))
-                        ok_parts.append(
-                            f"Shelf angle: {_sa:.1f}°  ·  Nozzle angle: {_na:.1f}°"
-                        )
                 elif info.get("max_width") is not None:
                     ok_parts = [f"Width: {w_mm} mm  ·  Length: {d_mm} mm  ·  Max: {info['max_width']} mm / {info['max_length']/1000:.0f} m"]
                 elif _max_perim is not None and itype == "d":
@@ -1693,11 +1703,14 @@ def server(input, output, session):
                 if appliance == "Range top" and vals.get("_shelf_nozzle_h") is not None:
                     _nh  = vals["_shelf_nozzle_h"]
                     _off = vals.get("_shelf_offset", 0)
-                    _off_mm = round(_off)
+                    _from_inner = round(d_mm / 2 + _off)
+                    if round(_off) == 0:
+                        _pos_note = "Position the nozzle centrally above its section."
+                    else:
+                        _pos_note = f"Position the nozzle {_from_inner} mm from the inner (back) edge of the section to maintain line of sight past the shelf."
                     placement_text = (
                         f"Nozzle placed 690 to {_nh} mm above its section, aiming straight down. "
-                        f"Position the nozzle {_off_mm} mm forward of the section centre (toward the front) "
-                        f"to maintain line of sight past the shelf."
+                        f"{_pos_note}"
                     )
                 else:
                     placement_text = NOZZLE_PLACEMENT.get(appliance, "")
@@ -1873,9 +1886,10 @@ def server(input, output, session):
                 where="beforeEnd",
             )
 
-    # Register card renderers for all possible slots upfront
+    # Register card renderers and remove observers for all possible slots upfront
     for _i in range(1, MAX_APPLIANCES + 1):
         _register_card(_i)
+        _register_remove(_i)
 
     # ── Register a result renderer for a slot ────────────────────
     def _register_result(idx):
