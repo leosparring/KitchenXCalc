@@ -84,6 +84,86 @@ CSS = """
         max-width: 480px;
         line-height: 1.6;
     }
+    .language-switcher {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        min-width: 140px;
+    }
+    .language-picker {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .language-picker.open .language-drop {
+        display: block;
+    }
+    .language-icon {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--light);
+        color: var(--navy);
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        user-select: none;
+    }
+    .language-drop {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 124px;
+        padding: 8px;
+        border-radius: 18px;
+        background: var(--white);
+        border: none;
+        box-shadow: 0 20px 35px rgba(0, 0, 0, 0.12);
+        z-index: 20;
+        overflow: hidden;
+    }
+    .language-item {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 14px;
+        background: var(--light);
+        color: var(--navy);
+        font-size: 0.95rem;
+        font-weight: 700;
+        padding: 10px 0;
+        margin: 4px 0;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.15s;
+    }
+    .language-item:hover {
+        background: rgba(227, 0, 15, 0.08);
+        transform: translateY(-1px);
+    }
+    .language-item:focus {
+        outline: 2px solid rgba(227, 0, 15, 0.35);
+        outline-offset: 2px;
+    }
+    .sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
     .divider { width: 40px; height: 3px; background: var(--red); margin: 14px 0 16px; }
 
     /* Card */
@@ -448,15 +528,353 @@ CSS = """
 
 MAX_APPLIANCES = 15
 
+LANGUAGE_OPTIONS = {
+    "en": "EN",
+    "sv": "SV",
+    "fi": "FI",
+    "no": "NO",
+    "de": "DE",
+}
+
+TRANSLATIONS = {
+    "app_title": {
+        "en": "Calculation Tool",
+        "sv": "Beräkningsverktyg",
+        "fi": "Laskentatyökalu",
+        "no": "Beregning",
+        "de": "Berechnungstool",
+    },
+    "app_description": {
+        "en": "Simplified system design for KitchenX",
+        "sv": "Förenklad systemdesign för KitchenX",
+        "fi": "Yksinkertaistettu järjestelmäsuunnittelu KitchenX:lle",
+        "no": "Forenklet systemdesign for KitchenX",
+        "de": "Vereinfachte Systemauslegung für KitchenX",
+    },
+    "language_label": {
+        "en": "Language",
+        "sv": "Språk",
+        "fi": "Kieli",
+        "no": "Språk",
+        "de": "Sprache",
+    },
+    "select_hazard": {
+        "en": "Select Hazard",
+        "sv": "Välj risk",
+        "fi": "Valitse risk",
+        "no": "Velg fare",
+        "de": "Gefahr wählen",
+    },
+    "select_hazard_placeholder": {
+        "en": "— choose one —",
+        "sv": "— välj en —",
+        "fi": "— valitse yksi —",
+        "no": "— velg en —",
+        "de": "— wähle eine —",
+    },
+    "hazard_card_title": {
+        "en": "Hazard {idx}",
+        "sv": "Risk {idx}",
+        "fi": "Riskialue {idx}",
+        "no": "Fare {idx}",
+        "de": "Gefahr {idx}",
+    },
+    "remove_button": {
+        "en": "Remove",
+        "sv": "Ta bort",
+        "fi": "Poista",
+        "no": "Fjern",
+        "de": "Entfernen",
+    },
+    "add_another_hazard": {
+        "en": "Add Another Hazard",
+        "sv": "Lägg till en till risk",
+        "fi": "Lisää toinen riski",
+        "no": "Legg til en fare til",
+        "de": "Weitere Gefahr hinzufügen",
+    },
+    "diameter": {
+        "en": "Diameter",
+        "sv": "Diameter",
+        "fi": "Halkaisija",
+        "no": "Diameter",
+        "de": "Durchmesser",
+    },
+    "width": {
+        "en": "Width",
+        "sv": "Bredd",
+        "fi": "Leveys",
+        "no": "Bredde",
+        "de": "Breite",
+    },
+    "depth": {
+        "en": "Depth",
+        "sv": "Djup",
+        "fi": "Syvyys",
+        "no": "Dybde",
+        "de": "Tiefe",
+    },
+    "length": {
+        "en": "Length",
+        "sv": "Längd",
+        "fi": "Pituus",
+        "no": "Lengde",
+        "de": "Länge",
+    },
+    "drip_board_depth": {
+        "en": "Drip Board Depth",
+        "sv": "Droppbrädans djup",
+        "fi": "Tiputuslevyn syvyys",
+        "no": "Dryppbrettdybde",
+        "de": "Tiefe der Tropfblech",
+    },
+    "shelf_height": {
+        "en": "Shelf Height",
+        "sv": "Hyllhöjd",
+        "fi": "Hyllykorkeus",
+        "no": "Hyllehøyde",
+        "de": "Regalhöhe",
+    },
+    "shelf_overhang": {
+        "en": "Shelf Overhang",
+        "sv": "Hylla utstick",
+        "fi": "Hyllyn ulkonema",
+        "no": "Hylleutspring",
+        "de": "Regalüberhang",
+    },
+    "quantity": {
+        "en": "Quantity",
+        "sv": "Antal",
+        "fi": "Määrä",
+        "no": "Antall",
+        "de": "Menge",
+    },
+    "dimensions": {
+        "en": "Dimensions",
+        "sv": "Mått",
+        "fi": "Mitat",
+        "no": "Mål",
+        "de": "Abmessungen",
+    },
+    "select_hazard_hint": {
+        "en": "← select a hazard",
+        "sv": "← välj en risk",
+        "fi": "← valitse riski",
+        "no": "← velg en fare",
+        "de": "← wählen Sie eine Gefahr",
+    },
+    "hint_diameter": {
+        "en": "Enter diameter to calculate",
+        "sv": "Ange diameter för att beräkna",
+        "fi": "Anna halkaisija laskentaa varten",
+        "no": "Angi diameter for å beregne",
+        "de": "Geben Sie den Durchmesser ein, um zu berechnen",
+    },
+    "hint_width_length_drip": {
+        "en": "Enter width, length & drip depth",
+        "sv": "Ange bredd, längd och droppdjup",
+        "fi": "Anna leveys, pituus ja tiputussyvyys",
+        "no": "Angi bredde, lengde og dryppdybde",
+        "de": "Geben Sie Breite, Länge und Tropftiefen ein",
+    },
+    "hint_width_length": {
+        "en": "Enter width & length to calculate",
+        "sv": "Ange bredd och längd för att beräkna",
+        "fi": "Anna leveys ja pituus laskentaa varten",
+        "no": "Angi bredde og lengde for å beregne",
+        "de": "Geben Sie Breite und Länge ein, um zu berechnen",
+    },
+    "system_summary": {
+        "en": "System Summary",
+        "sv": "Systemöversikt",
+        "fi": "Järjestelmän yhteenveto",
+        "no": "Systemoversikt",
+        "de": "Systemübersicht",
+    },
+    "hazard": {
+        "en": "Hazard",
+        "sv": "Risk",
+        "fi": "Riski",
+        "no": "Fare",
+        "de": "Gefahr",
+    },
+    "qty": {
+        "en": "Qty",
+        "sv": "Antal",
+        "fi": "Määrä",
+        "no": "Antall",
+        "de": "Stück",
+    },
+    "nozzle": {
+        "en": "Nozzle",
+        "sv": "Nozzle",
+        "fi": "Nozzeli",
+        "no": "Dyse",
+        "de": "Düse",
+    },
+    "flow": {
+        "en": "Flow",
+        "sv": "Flöde",
+        "fi": "Virtaus",
+        "no": "Flow",
+        "de": "Durchfluss",
+    },
+    "total": {
+        "en": "Total",
+        "sv": "Totalt",
+        "fi": "Yhteensä",
+        "no": "Totalt",
+        "de": "Summe",
+    },
+    "nozzles": {
+        "en": "Nozzles:",
+        "sv": "Munstycken:",
+        "fi": "Suuttimet:",
+        "no": "Dyser:",
+        "de": "Düsen:",
+    },
+    "save_as_pdf": {
+        "en": "⬇ Save as PDF",
+        "sv": "⬇ Spara som PDF",
+        "fi": "⬇ Tallenna PDF",
+        "no": "⬇ Lagre som PDF",
+        "de": "⬇ Als PDF speichern",
+    },
+    "save_system_summary": {
+        "en": "⬇ Save System Summary",
+        "sv": "⬇ Spara systemöversikt",
+        "fi": "⬇ Tallenna järjestelmän yhteenveto",
+        "no": "⬇ Lagre systemoversikt",
+        "de": "⬇ Systemübersicht speichern",
+    },
+    "section_singular": {
+        "en": "section",
+        "sv": "sektion",
+        "fi": "osio",
+        "no": "seksjon",
+        "de": "Abschnitt",
+    },
+    "section_plural": {
+        "en": "sections",
+        "sv": "sektioner",
+        "fi": "osioita",
+        "no": "seksjoner",
+        "de": "Abschnitte",
+    },
+    "cannot_be_protected": {
+        "en": "The {appliance} cannot be protected.",
+        "sv": "{appliance} kan inte skyddas.",
+        "fi": "{appliance} ei voida suojata.",
+        "no": "{appliance} kan ikke beskyttes.",
+        "de": "{appliance} kann nicht geschützt werden.",
+    },
+    "shelf_infeasible_title": {
+        "en": "Shelf constraint infeasible",
+        "sv": "Hyllkonstruktionen är inte möjlig",
+        "fi": "Hyllyn rajoitus ei ole mahdollinen",
+        "no": "Hyllebegrensningen er ikke mulig",
+        "de": "Regalbeschränkung nicht möglich",
+    },
+    "shelf_infeasible_message": {
+        "en": "No section layout can satisfy both the shelf angle and the c constraint. Reduce shelf overhang, increase shelf height, or reduce appliance dimensions.",
+        "sv": "Ingen sektionlayout kan uppfylla både hyllvinkeln och c-kravet. Minska utstick, öka hyllhöjden eller minska apparatens mått.",
+        "fi": "Yksikään osion asettelu ei voi täyttää sekä hyllyn kulmaa että c-rajoitusta. Vähennä hyllyn ulkonemaa, nosta hyllykorkeutta tai pienennä laitteen mittoja.",
+        "no": "Ingen seksjonsoppsett kan tilfredsstille både hyllevinkelen og c-begrensningen. Reduser hylleutspring, øk hyllehøyde eller reduser apparatets dimensjoner.",
+        "de": "Kein Abschnittslayout kann sowohl den Regalwinkel als auch die c-Beschränkung erfüllen. Reduzieren Sie den Regalüberhang, erhöhen Sie die Regalhöhe oder verringern Sie die Gerätemaße.",
+    },
+}
+
+APPLIANCE_LABELS = {
+    "en": {
+        key: key for key in APPLIANCES
+    },
+    "sv": {
+        "Fryer": "Fritös",
+        "Fryer with drip board": "Fritös med droppbräda",
+        "Griddle": "Grillplatta",
+        "Gas or electric broiler": "Gasspis eller elektrisk grill",
+        "Range top": "Spishäll",
+        "Wok": "Wok",
+        "Tilt skillet": "Hällstekpanna",
+        "Circular duct": "Cirkulär kanal",
+        "Rectangular duct": "Rektangulär kanal",
+        "Plenum": "Plenum",
+        "Plenum V-style": "Plenum V-stil",
+    },
+    "fi": {
+        "Fryer": "Fritös",
+        "Fryer with drip board": "Fritös med droppkant",
+        "Griddle": "Stekbord",
+        "Gas or electric broiler": "Gas- eller elgrill",
+        "Range top": "Spishäll",
+        "Wok": "Wok",
+        "Tilt skillet": "Tiltpanna",
+        "Circular duct": "Cirkulär kanal",
+        "Rectangular duct": "Rektangulär kanal",
+        "Plenum": "Plenum",
+        "Plenum V-style": "Plenum V-stil",
+    },
+    "no": {
+        "Fryer": "Friterer",
+        "Fryer with drip board": "Friterer med dryppbrett",
+        "Griddle": "Stekebord",
+        "Gas or electric broiler": "Gass- eller elektrisk grill",
+        "Range top": "Komfyrtopp",
+        "Wok": "Wok",
+        "Tilt skillet": "Vippepanne",
+        "Circular duct": "Sirkulær kanal",
+        "Rectangular duct": "Rektangulær kanal",
+        "Plenum": "Plenum",
+        "Plenum V-style": "Plenum V-stil",
+    },
+    "de": {
+        "Fryer": "Fritteuse",
+        "Fryer with drip board": "Fritteuse mit Tropfblech",
+        "Griddle": "Grillplatte",
+        "Gas or electric broiler": "Gas- oder Elektrogrill",
+        "Range top": "Kochfeld",
+        "Wok": "Wok",
+        "Tilt skillet": "Schwenkpfanne",
+        "Circular duct": "Rundkanal",
+        "Rectangular duct": "Rechteckkanal",
+        "Plenum": "Plenum",
+        "Plenum V-style": "Plenum V-Stil",
+    },
+}
+
+
+def get_translation(key, lang, **kwargs):
+    text = TRANSLATIONS.get(key, {}).get(lang) or TRANSLATIONS.get(key, {}).get("en") or key
+    return text.format(**kwargs) if kwargs else text
+
+
+def get_appliance_label(appliance, lang):
+    return APPLIANCE_LABELS.get(lang, {}).get(appliance, APPLIANCE_LABELS["en"].get(appliance, appliance))
+
+
+def get_appliance_choices(lang):
+    labels = APPLIANCE_LABELS.get(lang, APPLIANCE_LABELS["en"])
+    choices = {"": get_translation("select_hazard_placeholder", lang)}
+    choices.update({key: labels.get(key, key) for key in APPLIANCES})
+    return choices
+
+
+def normalize_language(value):
+    return value if value in LANGUAGE_OPTIONS else "en"
+
 
 NOZZLE_PLACEMENT = {'Fryer': 'Nozzle placed 690 to 1200 mm above the top of its section, aiming at the section center.', 'Fryer with drip board': 'Nozzle placed 690 to 1200 mm above the top of its section, aiming at the section center.', 'Wok': 'Nozzle placed 690 to 1200 mm above the wok, aiming at the center.', 'Tilt skillet': 'Nozzle placed 690 to 1200 mm above its section, aiming at the section center. Position should be at the front so that there is a clear line from the nozzle to the entire hazard area with the lid in open position.', 'Griddle': 'Nozzle placed 760 to 1020 mm above its section, 0 to 50 mm from the edge, aiming at the section center.', 'Gas or electric broiler': 'Nozzle placed 500 to 1020 mm above its section, aiming at the section center.', 'Range top': 'Nozzle placed centrally 690 to 1020 mm above its section, aiming straight down. If there is a shelf, ensure there is a clear line from the nozzle to the entire surface area.', 'Plenum': 'Nozzle placed maximum 150 mm from the start of the plenum, 50 to 100 mm from the filters, aiming horizontally. For multiple nozzles, they must aim in the same direction with linear separation of maximum 3 m.', 'Plenum V-style': 'Nozzle placed maximum 150 mm from the start of the plenum, 50 to 100 mm from the filters, aiming horizontally. For multiple nozzles, they must aim in the same direction with linear separation of maximum 3 m', 'Circular duct': 'Nozzle placed centrally in its section, 50 to 200 mm into the duct, aiming straight up.', 'Rectangular duct': 'Nozzle placed centrally in its section, 50 to 200 mm into the duct, aiming straight up.'}
 
 
-def appliance_card_ui(idx):
+def appliance_card_ui(idx, lang="en"):
     """Return UI for one hazard entry card. Input fields depend on selected hazard type."""
     suffix = f"_{idx}"
     remove_btn = (
-        ui.input_action_button(f"remove{suffix}", "✕ Remove", class_="btn-remove")
+        ui.input_action_button(
+            f"remove{suffix}",
+            f"✕ {get_translation('remove_button', lang)}",
+            class_="btn-remove",
+        )
         if idx > 1
         else ui.div()
     )
@@ -464,16 +882,16 @@ def appliance_card_ui(idx):
         {"class": "card", "id": f"appliance-card-{idx}"},
         ui.div(
             {"class": "card-header"},
-            ui.div({"class": "card-title"}, f"Hazard {idx}"),
+            ui.div({"class": "card-title"}, get_translation("hazard_card_title", lang, idx=idx)),
             remove_btn,
         ),
         ui.div(
             {"class": "form-group"},
             ui.input_select(
                 f"appliance{suffix}",
-                "Select Hazard",
-                choices=["— choose one —"] + list(APPLIANCES.keys()),
-                selected="— choose one —",
+                get_translation("select_hazard", lang),
+                choices=get_appliance_choices(lang),
+                selected="",
             ),
         ),
         # Dynamic input fields (incl. quantity) rendered after hazard selection
@@ -493,10 +911,42 @@ app_ui = ui.page_fluid(
         {"class": "app-wrapper"},
         ui.div(
             {"class": "header"},
-            ui.div({"style": "display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;"},ui.tags.img(src=_LOGO_SRC, alt="KitchenX", style="height:clamp(36px,8vw,60px);display:block;"),ui.tags.span("Calculation Tool", style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(28px,7vw,60px);font-weight:600;color:var(--fg);letter-spacing:-0.01em;line-height:1;")),
-            
-            ui.tags.p(
-                "Simplified system design for KitchenX"
+            ui.div(
+                {"style": "display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;"},
+                ui.div(
+                    {"style": "display:flex;align-items:center;gap:12px;flex-wrap:wrap;"},
+                    ui.tags.img(src=_LOGO_SRC, alt="KitchenX", style="height:clamp(36px,8vw,60px);display:block;"),
+                    ui.div(
+                        ui.output_ui("header_title"),
+                        ui.output_ui("header_description"),
+                    ),
+                ),
+                ui.div(
+                    {"class": "language-switcher"},
+                    ui.div(
+                        {"class": "language-picker", "id": "language_picker"},
+                        ui.output_ui("language_indicator"),
+                        ui.div(
+                            {"class": "language-drop", "id": "language_dropdown"},
+                            ui.div(
+                                {"style": "display:none;"},
+                                ui.input_select("language", "", choices=LANGUAGE_OPTIONS, selected="en"),
+                            ),
+                            *[
+                                ui.tags.button(
+                                    {
+                                        "type": "button",
+                                        "class": "language-item",
+                                        "onclick": f"selectLanguage('{key}')",
+                                    },
+                                    value,
+                                )
+                                for key, value in LANGUAGE_OPTIONS.items()
+                            ],
+                        ),
+                    ),
+                    ui.output_ui("language_label"),
+                ),
             ),
         ),
         ui.div({"id": "row_container_1", "style": "display:block;"},
@@ -549,11 +999,7 @@ app_ui = ui.page_fluid(
         ),
         ui.div(
             {"class": "btn-add-wrapper"},
-            ui.input_action_button(
-                "add_appliance",
-                ui.HTML("+ &nbsp; Add Another Hazard"),
-                class_="btn-add",
-            ),
+            ui.output_ui("add_button"),
         ),
         ui.output_ui("summary_panel"),
     ),
@@ -561,6 +1007,7 @@ app_ui = ui.page_fluid(
     ui.tags.script("""
 (function(){
   const LS_KEY = 'kxappliances_autosave';
+  const LANG_KEY = 'kxappliances_language';
   const MAX_SLOTS = 8;
   const SLOT_FIELDS = ['appliance','width','depth','dia','drip','qty'];
 
@@ -580,6 +1027,21 @@ app_ui = ui.page_fluid(
         data.slots.push(slot);
       }
       localStorage.setItem(LS_KEY, JSON.stringify(data));
+      const langSelect = document.getElementById('language');
+      if (langSelect) {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+      }
+    } catch(e){}
+  }
+
+  function restoreLanguage(){
+    try {
+      const lang = localStorage.getItem(LANG_KEY);
+      const langSelect = document.getElementById('language');
+      if (lang && langSelect) {
+        langSelect.value = lang;
+        langSelect.dispatchEvent(new Event('change', {bubbles: true}));
+      }
     } catch(e){}
   }
 
@@ -640,7 +1102,30 @@ app_ui = ui.page_fluid(
 
   // Auto-save on any input change (debounced)
   let saveTimer = null;
-  document.addEventListener('change', function(){ 
+  function closeLanguageDropdown(){
+    const picker = document.getElementById('language_picker');
+    if(picker) picker.classList.remove('open');
+  }
+
+  window.selectLanguage = function(lang){
+    const langSelect = document.getElementById('language');
+    if(!langSelect) return;
+    langSelect.value = lang;
+    langSelect.dispatchEvent(new Event('change', {bubbles: true}));
+    closeLanguageDropdown();
+  };
+
+  document.addEventListener('click', function(event){
+    const picker = document.getElementById('language_picker');
+    if(!picker) return;
+    if(picker.contains(event.target)) return;
+    closeLanguageDropdown();
+  });
+
+  document.addEventListener('change', function(event){ 
+    if(event.target && event.target.id === 'language'){
+      closeLanguageDropdown();
+    }
     clearTimeout(saveTimer);
     saveTimer = setTimeout(saveState, 800);
   });
@@ -651,10 +1136,10 @@ app_ui = ui.page_fluid(
 
   // Restore on page load after Shiny is ready
   if(window.Shiny){
-    Shiny.addCustomMessageHandler('__kx_ready__', function(){ restoreState(); });
+    Shiny.addCustomMessageHandler('__kx_ready__', function(){ restoreLanguage(); restoreState(); });
   }
   // Fallback: restore after a delay
-  setTimeout(restoreState, 1500);
+  setTimeout(function(){ restoreLanguage(); restoreState(); }, 1500);
 })();
 """),
 )
@@ -1321,6 +1806,54 @@ def server(input, output, session):
     slots = reactive.value([1])   # list of active slot IDs
     next_id = reactive.value(2)   # ever-increasing ID counter
 
+    def current_lang():
+        try:
+            return normalize_language(input.language())
+        except Exception:
+            return "en"
+
+    @output
+    @render.ui
+    def header_title():
+        return ui.tags.span(
+            get_translation("app_title", current_lang()),
+            style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(28px,7vw,60px);font-weight:600;color:var(--navy);letter-spacing:-0.01em;line-height:1;",
+        )
+
+    @output
+    @render.ui
+    def header_description():
+        return ui.tags.p(get_translation("app_description", current_lang()))
+
+    @output
+    @render.ui
+    def language_label():
+        return ui.tags.label(
+            {"for": "language", "class": "sr-only"},
+            get_translation("language_label", current_lang()),
+        )
+
+    @output
+    @render.ui
+    def language_indicator():
+        return ui.tags.span(
+            current_lang().upper(),
+            {
+                "class": "language-icon",
+                "title": get_translation("language_label", current_lang()),
+                "onclick": "document.getElementById('language_picker').classList.toggle('open');",
+            },
+        )
+
+    @output
+    @render.ui
+    def add_button():
+        return ui.input_action_button(
+            "add_appliance",
+            ui.HTML("+ &nbsp; " + get_translation("add_another_hazard", current_lang())),
+            class_="btn-add",
+        )
+
     # ── Add a new slot ──────────────────────────────────────────
     @reactive.effect
     @reactive.event(input.add_appliance)
@@ -1345,7 +1878,7 @@ def server(input, output, session):
             appliance = getattr(input, f"appliance{suffix}")()
         except Exception:
             return None, None
-        if not appliance or appliance == "— choose one —":
+        if not appliance:
             return appliance, None
         info = APPLIANCES[appliance]
         itype = info["input_type"]
@@ -1392,13 +1925,14 @@ def server(input, output, session):
             return (w / 1000) * (d / 1000)       # mm → m
 
     # ── Build inline result panel for one slot ──────────────────
-    def build_inline_result(idx):
+    def build_inline_result(idx, lang):
         appliance, vals = read_inputs(idx)
 
-        if not appliance or appliance == "— choose one —":
-            return ui.div({"class": "result-inline-empty"}, "← select a hazard")
+        if not appliance:
+            return ui.div({"class": "result-inline-empty"}, get_translation("select_hazard_hint", lang))
 
         info = APPLIANCES[appliance]
+        appliance_label = get_appliance_label(appliance, lang)
         icon = info["icon"]
         itype = info["input_type"]
         area_m2 = compute_area(appliance, vals)
@@ -1786,7 +2320,7 @@ def server(input, output, session):
                 nozzle_label = f"{n_sections}x {nozzle}"
                 stat_tiles.append(
                     ui.div({"class": "result-inline-stat"},
-                           ui.div({"class": "result-inline-stat-label"}, "Nozzle"),
+                           ui.div({"class": "result-inline-stat-label"}, get_translation("nozzle", lang)),
                            ui.div({"class": "result-inline-stat-value", "style": "font-size:1rem;"}, nozzle_label),
                            ui.div({"class": "result-inline-stat-unit"}, ""))
                 )
@@ -1795,7 +2329,7 @@ def server(input, output, session):
                 total_flow = n_sections * flow * qty
                 stat_tiles.append(
                     ui.div({"class": "result-inline-stat"},
-                           ui.div({"class": "result-inline-stat-label"}, "Flow"),
+                           ui.div({"class": "result-inline-stat-label"}, get_translation("flow", lang)),
                            ui.div({"class": "result-inline-stat-value"}, str(total_flow)),
                            ui.div({"class": "result-inline-stat-unit"}, ""))
                 )
@@ -1807,9 +2341,9 @@ def server(input, output, session):
             # Placeholder stat tiles
             labels = []
             if info.get("nozzle") is not None:
-                labels.append("Nozzle")  # placeholder shown before values entered
+                labels.append(get_translation("nozzle", lang))
             if info.get("flow") is not None:
-                labels.append("Flow")
+                labels.append(get_translation("flow", lang))
             stats = ui.div(
                 {"class": "result-inline-grid"},
                 *[ui.div({"class": "result-inline-stat"},
@@ -1818,11 +2352,11 @@ def server(input, output, session):
                   for lbl in labels]
             )
             if itype == "d":
-                hint = "Enter diameter to calculate"
+                hint = get_translation("hint_diameter", lang)
             elif itype == "wl_drip":
-                hint = "Enter width, length & drip depth"
+                hint = get_translation("hint_width_length_drip", lang)
             else:
-                hint = "Enter width & length to calculate"
+                hint = get_translation("hint_width_length", lang)
             footprint = ui.div(
                 {"class": "result-inline-dims", "style": "opacity:0.4; margin-top:6px;"},
                 hint
@@ -1840,12 +2374,11 @@ def server(input, output, session):
                     {"style": "font-family:'Barlow Condensed',sans-serif; font-size:10px; "
                               "letter-spacing:0.12em; text-transform:uppercase; "
                               "color:#ff6b6b; font-weight:700; margin-bottom:4px;"},
-                    f"⛔  Shelf constraint infeasible (shelf angle {_sa:.1f}°)"
+                    get_translation("shelf_infeasible_title", lang) + f" ({_sa:.1f}°)"
                 ),
                 ui.div(
                     {"style": "font-size:12px; color:rgba(245,240,232,0.85); font-weight:500;"},
-                    "No section layout can satisfy both the shelf angle and the c ≤ 270 mm constraint. "
-                    "Reduce shelf overhang, increase shelf height, or reduce appliance dimensions."
+                    get_translation("shelf_infeasible_message", lang),
                 ),
             )
         return ui.div(
@@ -1854,8 +2387,8 @@ def server(input, output, session):
                 {"class": "result-inline-header"},
                 ui.div({"class": "result-inline-icon"}, icon),
                 ui.div(
-                    ui.div({"class": "result-inline-name"}, appliance),
-                    ui.div({"class": "result-inline-subtitle"}, "dimensions"),
+                    ui.div({"class": "result-inline-name"}, appliance_label),
+                    ui.div({"class": "result-inline-subtitle"}, get_translation("dimensions", lang)),
                 ),
             ),
             stats,
@@ -1870,7 +2403,7 @@ def server(input, output, session):
         @output(id=f"card_{idx}")
         @render.ui
         def _card():
-            return appliance_card_ui(idx)
+            return appliance_card_ui(idx, current_lang())
 
     # ── Show/hide row containers based on active slots ────────────
     @reactive.effect
@@ -1896,7 +2429,7 @@ def server(input, output, session):
         @output(id=f"result_{idx}")
         @render.ui
         def _result():
-            return build_inline_result(idx)
+            return build_inline_result(idx, current_lang())
 
     # ── Register dynamic input fields renderer for a slot ───────────
     def _register_inputs(idx):
@@ -1904,11 +2437,12 @@ def server(input, output, session):
         @render.ui
         def _inputs():
             suffix = f"_{idx}"
+            lang = current_lang()
             try:
                 appliance = getattr(input, f"appliance{suffix}")()
             except Exception:
                 appliance = None
-            if not appliance or appliance == "— choose one —":
+            if not appliance:
                 return ui.div()
             info = APPLIANCES[appliance]
             itype = info["input_type"]
@@ -1918,12 +2452,12 @@ def server(input, output, session):
                         {"class": "input-row"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"dia{suffix}", "Diameter", value=None, min=1, max=9999),
+                            ui.input_numeric(f"dia{suffix}", get_translation("diameter", lang), value=None, min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"qty{suffix}", "Quantity", value=1, min=1, max=999),
+                            ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=1, min=1, max=999),
                         ),
                     ),
                 )
@@ -1933,12 +2467,12 @@ def server(input, output, session):
                         {"class": "input-row"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"width{suffix}", "Width", value=None, min=1, max=9999),
+                            ui.input_numeric(f"width{suffix}", get_translation("width", lang), value=None, min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"depth{suffix}", "Depth", value=None, min=1, max=9999),
+                            ui.input_numeric(f"depth{suffix}", get_translation("depth", lang), value=None, min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                     ),
@@ -1946,29 +2480,29 @@ def server(input, output, session):
                         {"class": "input-row", "style": "margin-top:4px;"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"drip{suffix}", "Drip Board Depth", value=None, min=1, max=9999),
+                            ui.input_numeric(f"drip{suffix}", get_translation("drip_board_depth", lang), value=None, min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"qty{suffix}", "Quantity", value=1, min=1, max=999),
+                            ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=1, min=1, max=999),
                         ),
                     ),
                 )
             else:
-                depth_label = "Length" if appliance in ("Plenum", "Plenum V-style") else "Depth"
+                depth_label = get_translation("length", lang) if appliance in ("Plenum", "Plenum V-style") else get_translation("depth", lang)
                 shelf_row = ui.div()
                 if appliance == "Range top":
                     shelf_row = ui.div(
                         {"class": "input-row", "style": "margin-top:4px;"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"shelf_height{suffix}", "Shelf Height", value=None, min=1, max=9999),
+                            ui.input_numeric(f"shelf_height{suffix}", get_translation("shelf_height", lang), value=None, min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"shelf_overhang{suffix}", "Shelf Overhang", value=None, min=0, max=9999),
+                            ui.input_numeric(f"shelf_overhang{suffix}", get_translation("shelf_overhang", lang), value=None, min=0, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                     )
@@ -1977,7 +2511,7 @@ def server(input, output, session):
                         {"class": "input-row"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"width{suffix}", "Width", value=None, min=1, max=9999),
+                            ui.input_numeric(f"width{suffix}", get_translation("width", lang), value=None, min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
@@ -1989,7 +2523,7 @@ def server(input, output, session):
                     shelf_row,
                     ui.div(
                         {"class": "form-group", "style": "margin-top:4px; max-width:50%;"},
-                        ui.input_numeric(f"qty{suffix}", "Quantity", value=1, min=1, max=999),
+                        ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=1, min=1, max=999),
                     ),
                 )
 
@@ -1999,11 +2533,12 @@ def server(input, output, session):
         _register_inputs(_i)
 
     # ── Build result data for summary table ───────────────────────
-    def build_result(idx):
+    def build_result(idx, lang):
         appliance, vals = read_inputs(idx)
-        if not appliance or appliance == "— choose one —":
+        if not appliance:
             return None, None
         info = APPLIANCES[appliance]
+        appliance_label = get_appliance_label(appliance, lang)
         itype = info["input_type"]
         area_m2 = compute_area(appliance, vals)
         if area_m2 is None:
@@ -2074,7 +2609,7 @@ def server(input, output, session):
         nozzle_count = n_sections * qty if nozzle is not None else 0
         nozzle_type  = nozzle  # the range string e.g. "2-30"
 
-        row_data = (appliance, info["icon"], qty, nozzle_str, total_flow, nozzle_count, nozzle_type)
+        row_data = (appliance_label, info["icon"], qty, nozzle_str, total_flow, nozzle_count, nozzle_type)
         return None, row_data
 
     # ── Render summary table only ─────────────────────────────────
@@ -2086,8 +2621,9 @@ def server(input, output, session):
         total_flow = 0
 
         nozzle_totals = {}  # nozzle_type -> total count
+        lang = current_lang()
         for idx in current:
-            _, row_data = build_result(idx)
+            _, row_data = build_result(idx, lang)
             if row_data:
                 name, icon, qty, nozzle_str, flow_val, nozzle_count, nozzle_type = row_data
                 if flow_val is not None:
@@ -2121,7 +2657,7 @@ def server(input, output, session):
             nozzle_parts = [f"{count}× {ntype}" for ntype, count in sorted(nozzle_totals.items())]
             nozzle_summary = ui.div(
                 {"style": "margin-top:6px; font-size:12px; color:var(--steel);"},
-                "Nozzles: " + ",  ".join(nozzle_parts),
+                get_translation("nozzles", lang) + " " + ",  ".join(nozzle_parts),
             )
         else:
             nozzle_summary = ui.div()
@@ -2143,16 +2679,16 @@ def server(input, output, session):
 
         return ui.div(
             {"class": "summary-card"},
-            ui.div({"class": "summary-title"}, "System Summary"),
+            ui.div({"class": "summary-title"}, get_translation("system_summary", lang)),
             ui.tags.table(
                 {"class": "summary-table"},
                 ui.tags.thead(
                     ui.tags.tr(
                         ui.tags.th(""),
-                        ui.tags.th("Hazard"),
-                        ui.tags.th("Qty"),
-                        ui.tags.th("Nozzle"),
-                        ui.tags.th("Flow"),
+                        ui.tags.th(get_translation("hazard", lang)),
+                        ui.tags.th(get_translation("qty", lang)),
+                        ui.tags.th(get_translation("nozzle", lang)),
+                        ui.tags.th(get_translation("flow", lang)),
                     )
                 ),
                 ui.tags.tbody(
@@ -2160,7 +2696,7 @@ def server(input, output, session):
                     ui.tags.tr(
                         {"class": "total-row"},
                         ui.tags.td(""),
-                        ui.tags.td("Total"),
+                        ui.tags.td(get_translation("total", lang)),
                         ui.tags.td(""),
                         ui.tags.td(""),
                         ui.tags.td(str(total_flow)),
@@ -2171,12 +2707,12 @@ def server(input, output, session):
             ui.div(
                 {"style": "display:flex;gap:10px;align-items:center;margin-top:14px;"},
                 ui.tags.button(
-                    "⬇ Save as PDF",
+                    get_translation("save_as_pdf", lang),
                     onclick="window.print()",
                     class_="btn-pdf",
                 ),
                 ui.tags.button(
-                    "⬇ Save System Summary",
+                    get_translation("save_system_summary", lang),
                     onclick="""
                         var el = document.querySelector('.summary-card');
                         if (!el) return;
