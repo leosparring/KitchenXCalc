@@ -866,7 +866,7 @@ def normalize_language(value):
 NOZZLE_PLACEMENT = {'Fryer': 'Nozzle placed 690 to 1200 mm above the top of its section, aiming at the section center.', 'Fryer with drip board': 'Nozzle placed 690 to 1200 mm above the top of its section, aiming at the section center.', 'Wok': 'Nozzle placed 690 to 1200 mm above the wok, aiming at the center.', 'Tilt skillet': 'Nozzle placed 690 to 1200 mm above its section, aiming at the section center. Position should be at the front so that there is a clear line from the nozzle to the entire hazard area with the lid in open position.', 'Griddle': 'Nozzle placed 760 to 1020 mm above its section, 0 to 50 mm from the edge, aiming at the section center.', 'Gas or electric broiler': 'Nozzle placed 500 to 1020 mm above its section, aiming at the section center.', 'Range top': 'Nozzle placed centrally 690 to 1020 mm above its section, aiming straight down. If there is a shelf, ensure there is a clear line from the nozzle to the entire surface area.', 'Plenum': 'Nozzle placed maximum 150 mm from the start of the plenum, 50 to 100 mm from the filters, aiming horizontally. For multiple nozzles, they must aim in the same direction with linear separation of maximum 3 m.', 'Plenum V-style': 'Nozzle placed maximum 150 mm from the start of the plenum, 50 to 100 mm from the filters, aiming horizontally. For multiple nozzles, they must aim in the same direction with linear separation of maximum 3 m', 'Circular duct': 'Nozzle placed centrally in its section, 50 to 200 mm into the duct, aiming straight up.', 'Rectangular duct': 'Nozzle placed centrally in its section, 50 to 200 mm into the duct, aiming straight up.'}
 
 
-def appliance_card_ui(idx, lang="en"):
+def appliance_card_ui(idx, lang="en", selected=None):
     """Return UI for one hazard entry card. Input fields depend on selected hazard type."""
     suffix = f"_{idx}"
     remove_btn = (
@@ -878,6 +878,11 @@ def appliance_card_ui(idx, lang="en"):
         if idx > 1
         else ui.div()
     )
+    select_args = {
+        "choices": get_appliance_choices(lang),
+    }
+    if selected:
+        select_args["selected"] = selected
     return ui.div(
         {"class": "card", "id": f"appliance-card-{idx}"},
         ui.div(
@@ -890,8 +895,7 @@ def appliance_card_ui(idx, lang="en"):
             ui.input_select(
                 f"appliance{suffix}",
                 get_translation("select_hazard", lang),
-                choices=get_appliance_choices(lang),
-                selected="",
+                **select_args,
             ),
         ),
         # Dynamic input fields (incl. quantity) rendered after hazard selection
@@ -1854,6 +1858,73 @@ def server(input, output, session):
             class_="btn-add",
         )
 
+    # ── Update input labels and values when language changes ───────────────
+    @reactive.effect
+    @reactive.event(current_lang)
+    def _update_input_labels():
+        lang = current_lang()
+        for idx in range(1, MAX_APPLIANCES + 1):
+            suffix = f"_{idx}"
+            try:
+                appliance = getattr(input, f"appliance{suffix}")()
+            except Exception:
+                continue
+            if not appliance:
+                continue
+            info = APPLIANCES[appliance]
+            itype = info["input_type"]
+            # Update labels and values
+            if itype == "d":
+                ui.update_numeric(f"dia{suffix}", label=get_translation("diameter", lang))
+                ui.update_numeric(f"qty{suffix}", label=get_translation("quantity", lang))
+                try:
+                    dia_val = getattr(input, f"dia{suffix}")()
+                    qty_val = getattr(input, f"qty{suffix}")()
+                    ui.update_numeric(f"dia{suffix}", value=dia_val)
+                    ui.update_numeric(f"qty{suffix}", value=qty_val or 1)
+                except Exception:
+                    pass
+            elif itype == "wl_drip":
+                ui.update_numeric(f"width{suffix}", label=get_translation("width", lang))
+                ui.update_numeric(f"depth{suffix}", label=get_translation("depth", lang))
+                ui.update_numeric(f"drip{suffix}", label=get_translation("drip_board_depth", lang))
+                ui.update_numeric(f"qty{suffix}", label=get_translation("quantity", lang))
+                try:
+                    w_val = getattr(input, f"width{suffix}")()
+                    d_val = getattr(input, f"depth{suffix}")()
+                    drip_val = getattr(input, f"drip{suffix}")()
+                    qty_val = getattr(input, f"qty{suffix}")()
+                    ui.update_numeric(f"width{suffix}", value=w_val)
+                    ui.update_numeric(f"depth{suffix}", value=d_val)
+                    ui.update_numeric(f"drip{suffix}", value=drip_val)
+                    ui.update_numeric(f"qty{suffix}", value=qty_val or 1)
+                except Exception:
+                    pass
+            else:
+                ui.update_numeric(f"width{suffix}", label=get_translation("width", lang))
+                depth_label = get_translation("length", lang) if appliance in ("Plenum", "Plenum V-style") else get_translation("depth", lang)
+                ui.update_numeric(f"depth{suffix}", label=depth_label)
+                ui.update_numeric(f"qty{suffix}", label=get_translation("quantity", lang))
+                try:
+                    w_val = getattr(input, f"width{suffix}")()
+                    d_val = getattr(input, f"depth{suffix}")()
+                    qty_val = getattr(input, f"qty{suffix}")()
+                    ui.update_numeric(f"width{suffix}", value=w_val)
+                    ui.update_numeric(f"depth{suffix}", value=d_val)
+                    ui.update_numeric(f"qty{suffix}", value=qty_val or 1)
+                except Exception:
+                    pass
+                if appliance == "Range top":
+                    ui.update_numeric(f"shelf_height{suffix}", label=get_translation("shelf_height", lang))
+                    ui.update_numeric(f"shelf_overhang{suffix}", label=get_translation("shelf_overhang", lang))
+                    try:
+                        sh_val = getattr(input, f"shelf_height{suffix}")()
+                        so_val = getattr(input, f"shelf_overhang{suffix}")()
+                        ui.update_numeric(f"shelf_height{suffix}", value=sh_val)
+                        ui.update_numeric(f"shelf_overhang{suffix}", value=so_val)
+                    except Exception:
+                        pass
+
     # ── Add a new slot ──────────────────────────────────────────
     @reactive.effect
     @reactive.event(input.add_appliance)
@@ -2403,7 +2474,11 @@ def server(input, output, session):
         @output(id=f"card_{idx}")
         @render.ui
         def _card():
-            return appliance_card_ui(idx, current_lang())
+            try:
+                selected = getattr(input, f"appliance_{idx}")()
+            except Exception:
+                selected = None
+            return appliance_card_ui(idx, current_lang(), selected)
 
     # ── Show/hide row containers based on active slots ────────────
     @reactive.effect
@@ -2446,18 +2521,21 @@ def server(input, output, session):
                 return ui.div()
             info = APPLIANCES[appliance]
             itype = info["input_type"]
+            # Helper to get current value safely
+            def get_val(field):
+                return None  # Don't read current values to avoid re-rendering on input changes
             if itype == "d":
                 return ui.div(
                     ui.div(
                         {"class": "input-row"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"dia{suffix}", get_translation("diameter", lang), value=None, min=1, max=9999),
+                            ui.input_numeric(f"dia{suffix}", get_translation("diameter", lang), value=get_val("dia"), min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=1, min=1, max=999),
+                            ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=get_val("qty") or 1, min=1, max=999),
                         ),
                     ),
                 )
@@ -2467,12 +2545,12 @@ def server(input, output, session):
                         {"class": "input-row"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"width{suffix}", get_translation("width", lang), value=None, min=1, max=9999),
+                            ui.input_numeric(f"width{suffix}", get_translation("width", lang), value=get_val("width"), min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"depth{suffix}", get_translation("depth", lang), value=None, min=1, max=9999),
+                            ui.input_numeric(f"depth{suffix}", get_translation("depth", lang), value=get_val("depth"), min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                     ),
@@ -2480,12 +2558,12 @@ def server(input, output, session):
                         {"class": "input-row", "style": "margin-top:4px;"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"drip{suffix}", get_translation("drip_board_depth", lang), value=None, min=1, max=9999),
+                            ui.input_numeric(f"drip{suffix}", get_translation("drip_board_depth", lang), value=get_val("drip"), min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=1, min=1, max=999),
+                            ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=get_val("qty") or 1, min=1, max=999),
                         ),
                     ),
                 )
@@ -2497,12 +2575,12 @@ def server(input, output, session):
                         {"class": "input-row", "style": "margin-top:4px;"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"shelf_height{suffix}", get_translation("shelf_height", lang), value=None, min=1, max=9999),
+                            ui.input_numeric(f"shelf_height{suffix}", get_translation("shelf_height", lang), value=get_val("shelf_height"), min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"shelf_overhang{suffix}", get_translation("shelf_overhang", lang), value=None, min=0, max=9999),
+                            ui.input_numeric(f"shelf_overhang{suffix}", get_translation("shelf_overhang", lang), value=get_val("shelf_overhang"), min=0, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                     )
@@ -2511,19 +2589,19 @@ def server(input, output, session):
                         {"class": "input-row"},
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"width{suffix}", get_translation("width", lang), value=None, min=1, max=9999),
+                            ui.input_numeric(f"width{suffix}", get_translation("width", lang), value=get_val("width"), min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                         ui.div(
                             {"class": "form-group"},
-                            ui.input_numeric(f"depth{suffix}", depth_label, value=None, min=1, max=9999),
+                            ui.input_numeric(f"depth{suffix}", depth_label, value=get_val("depth"), min=1, max=9999),
                             ui.div({"class": "unit-hint"}, "mm"),
                         ),
                     ),
                     shelf_row,
                     ui.div(
                         {"class": "form-group", "style": "margin-top:4px; max-width:50%;"},
-                        ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=1, min=1, max=999),
+                        ui.input_numeric(f"qty{suffix}", get_translation("quantity", lang), value=get_val("qty") or 1, min=1, max=999),
                     ),
                 )
 
