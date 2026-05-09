@@ -19,10 +19,11 @@ from calculations import (
     optimal_circle_grid,
     summarize_slot,
 )
-from data import APPLIANCES, MAX_APPLIANCES, NOZZLE_PLACEMENT
+from data import APPLIANCES, MAX_APPLIANCES
 from svg import build_sections_svg
 from translations import (
     get_appliance_label,
+    get_nozzle_placement,
     get_translation,
     normalize_language,
 )
@@ -242,6 +243,8 @@ def server(input, output, session):
             needs_split = calc["needs_split"]
             section_area = calc["section_area"]
             violation_msgs = calc["violation_msgs"]
+            w_mm = vals.get("width") or 1
+            d_mm = vals.get("depth") or 1
 
             # ── Shelf infeasible warning ───────────────────────────────────────
             shelf_infeasible = vals.get("_shelf_infeasible", False) if vals else False
@@ -267,37 +270,37 @@ def server(input, output, session):
             # ── Build sections block ──────────────────────────────
             if needs_split:
                 if itype == "d":
-                    grid_info = f"{rows}×{cols} grid · "
+                    grid_info = f"{rows}×{cols} {get_translation('grid', lang)} · "
                 else:
-                    grid_info = f"{rows}×{cols} grid · " if (rows > 1 and cols > 1) else ""
+                    grid_info = f"{rows}×{cols} {get_translation('grid', lang)} · " if (rows > 1 and cols > 1) else ""
                 if itype == "d" and info.get("max_perim") is not None:
                     # Circular duct: show cell perimeter instead of area
                     cell_w_mm_circ = vals.get("dia", 1) / cols
                     cell_d_mm_circ = vals.get("dia", 1) / rows
                     cp_circ = cell_perimeter(cell_w_mm_circ, cell_d_mm_circ)
-                    note_parts = [f"{grid_info}Cell perimeter: {cp_circ:.0f} mm  ·  Max: {info['max_perim']} mm"]
+                    note_parts = [f"{grid_info}{get_translation('cell_perimeter', lang)}: {cp_circ:.0f} mm  ·  {get_translation('max', lang)}: {info['max_perim']} mm"]
                 elif itype != "d":
-                    note_parts = [f"{grid_info}Each section: {section_area:.4f} m²,  {cell_w:.0f}×{cell_d:.0f} mm"]
+                    note_parts = [f"{grid_info}{get_translation('each_section', lang)}: {section_area:.4f} m²,  {cell_w:.0f}×{cell_d:.0f} mm"]
                 else:
-                    note_parts = [f"{grid_info}Each section: {section_area:.4f} m²"]
+                    note_parts = [f"{grid_info}{get_translation('each_section', lang)}: {section_area:.4f} m²"]
                 _distance  = info.get("distance")
                 _max_side  = info.get("max_side")
                 _max_perim = info.get("max_perim")
                 if _distance is not None:
                     _shelf_off_here = vals.get("_shelf_offset", 0) or 0
                     c_cell = compute_c(cell_w, cell_d + 2 * _shelf_off_here) if _shelf_off_here else compute_c(cell_w, cell_d)
-                    note_parts.append(f"c: {c_cell:.1f} mm  ·  Limit: {_distance} mm")
+                    note_parts.append(f"c: {c_cell:.1f} mm  ·  {get_translation('limit', lang)}: {_distance} mm")
                     _shelf_nozzle_h = vals.get("_shelf_nozzle_h") if itype != "d" else None
                 elif info.get("max_width") is not None:
-                    note_parts.append(f"Max width: {info['max_width']} mm  ·  Max length: {info['max_length']/1000:.0f} m")
+                    note_parts.append(f"{get_translation('max_width', lang)}: {info['max_width']} mm  ·  {get_translation('max_length', lang)}: {info['max_length']/1000:.0f} m")
                 elif _max_perim is not None and itype != "d":
                     cp = cell_perimeter(cell_w, cell_d)
-                    note_parts.append(f"Cell perimeter: {cp:.0f} mm  ·  Max: {_max_perim} mm")
+                    note_parts.append(f"{get_translation('cell_perimeter', lang)}: {cp:.0f} mm  ·  {get_translation('max', lang)}: {_max_perim} mm")
                 # (circular duct perimeter already added above when itype=="d")
                 elif max_area is not None:
-                    note_parts.append(f"Max area: {max_area} m²")
+                    note_parts.append(f"{get_translation('max_area', lang)}: {max_area} m²")
                     if _max_side:
-                        note_parts.append(f"Max side: {_max_side} mm")
+                        note_parts.append(f"{get_translation('max_side', lang)}: {_max_side} mm")
 
                 note_text = "  ·  ".join(note_parts)
 
@@ -308,11 +311,15 @@ def server(input, output, session):
                     if rows > 1 and abs(cell_d_top_note - cell_d_bot_note) > 0.5:
                         area_top = (cell_w / 1000) * (cell_d_top_note / 1000)
                         area_bot = (cell_w / 1000) * (cell_d_bot_note / 1000)
-                        row_label = 'row' if rows == 2 else f'{rows-1} rows'
+                        row_label = (
+                            get_translation("upper_row", lang)
+                            if rows == 2
+                            else get_translation("upper_rows", lang, count=rows - 1)
+                        )
                         dim_note = ui.div(
                             {"class": "sections-note", "style": "margin-top:2px;"},
-                            f"Upper {row_label}: {cell_w:.0f}×{cell_d_top_note:.0f} mm ({area_top:.4f} m²)  ·  "
-                            f"Bottom row (drip): {cell_w:.0f}×{cell_d_bot_note:.0f} mm ({area_bot:.4f} m²)"
+                            f"{row_label}: {cell_w:.0f}×{cell_d_top_note:.0f} mm ({area_top:.4f} m²)  ·  "
+                            f"{get_translation('bottom_row_drip', lang)}: {cell_w:.0f}×{cell_d_bot_note:.0f} mm ({area_bot:.4f} m²)"
                         )
                         note_text = ""  # suppress the generic note above
                     else:
@@ -325,26 +332,19 @@ def server(input, output, session):
                     _off = vals.get("_shelf_offset", 0)
                     _from_inner = round(cell_d / 2 + _off)
                     if round(_off) == 0:
-                        _pos_note = "Position the nozzle centrally above its section."
+                        _pos_note = get_translation("position_nozzle_center", lang)
                     elif rows > 1:
-                        _pos_note = (
-                            f"Position the innermost row of nozzles {_from_inner} mm from the inner (back) edge of the section "
-                            f"to maintain line of sight past the shelf. "
-                            f"All other nozzles should be placed centrally above their section."
-                        )
+                        _pos_note = get_translation("position_nozzle_inner_row", lang, distance=_from_inner)
                     else:
-                        _pos_note = f"Position the nozzle {_from_inner} mm from the inner (back) edge of the section to maintain line of sight past the shelf."
-                    placement_text = (
-                        f"Nozzle placed 690 to {_nh} mm above its section, aiming straight down. "
-                        f"{_pos_note}"
-                    )
+                        _pos_note = get_translation("position_nozzle_inner", lang, distance=_from_inner)
+                    placement_text = get_translation("range_nozzle_placement", lang, height=_nh, position=_pos_note)
                 else:
-                    placement_text = NOZZLE_PLACEMENT.get(appliance, "")
+                    placement_text = get_nozzle_placement(appliance, lang)
                 sections_block = ui.div(
                     {"class": "sections-neutral"},
                     ui.div(
                         {"class": "sections-neutral-title"},
-                        f"{n_sections} section{'s' if n_sections > 1 else ''}",
+                        f"{n_sections} {get_translation('section_plural' if n_sections > 1 else 'section_singular', lang)}",
                     ),
                     ui.div() if abs_exceeded else ui.HTML(svg_html),
                     ui.div({"class": "sections-note"}, note_text) if note_text else ui.div(),
@@ -357,40 +357,37 @@ def server(input, output, session):
                 _max_perim = info.get("max_perim")
                 if _distance is not None:
                     c_val    = compute_c(w_mm, d_mm) if itype != "d" else 0
-                    ok_parts = [f"c = {c_val:.1f} mm  ·  Distance limit: {_distance} mm"]
+                    ok_parts = [f"c = {c_val:.1f} mm  ·  {get_translation('distance_limit', lang)}: {_distance} mm"]
                     _shelf_nozzle_h = vals.get("_shelf_nozzle_h")
                 elif info.get("max_width") is not None:
-                    ok_parts = [f"Width: {w_mm} mm  ·  Length: {d_mm} mm  ·  Max: {info['max_width']} mm / {info['max_length']/1000:.0f} m"]
+                    ok_parts = [f"{get_translation('width', lang)}: {w_mm} mm  ·  {get_translation('length', lang)}: {d_mm} mm  ·  {get_translation('max', lang)}: {info['max_width']} mm / {info['max_length']/1000:.0f} m"]
                 elif _max_perim is not None and itype == "d":
-                    ok_parts = [f"Diameter {vals.get('dia')} mm ≤ max {info.get('max_dia')} mm"]
+                    ok_parts = [f"{get_translation('diameter', lang)} {vals.get('dia')} mm ≤ {get_translation('max', lang).lower()} {info.get('max_dia')} mm"]
                 elif _max_perim is not None:
-                    ok_parts = [f"Perimeter: {cell_perimeter(w_mm, d_mm):.0f} mm  ·  Max: {_max_perim} mm"]
+                    ok_parts = [f"{get_translation('cell_perimeter', lang)}: {cell_perimeter(w_mm, d_mm):.0f} mm  ·  {get_translation('max', lang)}: {_max_perim} mm"]
                 elif max_area is not None:
-                    ok_parts = [f"Area: {area_m2:.4f} m²  ·  Max: {max_area} m²"]
+                    ok_parts = [f"{get_translation('area', lang)}: {area_m2:.4f} m²  ·  {get_translation('max', lang)}: {max_area} m²"]
                     _max_side = info.get("max_side")
                     if _max_side:
-                        ok_parts.append(f"Max side: {_max_side} mm")
+                        ok_parts.append(f"{get_translation('max_side', lang)}: {_max_side} mm")
                 else:
-                    ok_parts = [f"Area: {area_m2:.4f} m²"]
+                    ok_parts = [f"{get_translation('area', lang)}: {area_m2:.4f} m²"]
                 if appliance == "Range top" and vals.get("_shelf_nozzle_h") is not None:
                     _nh  = vals["_shelf_nozzle_h"]
                     _off = vals.get("_shelf_offset", 0)
                     _from_inner = round(d_mm / 2 + _off)
                     if round(_off) == 0:
-                        _pos_note = "Position the nozzle centrally above its section."
+                        _pos_note = get_translation("position_nozzle_center", lang)
                     else:
-                        _pos_note = f"Position the nozzle {_from_inner} mm from the inner (back) edge of the section to maintain line of sight past the shelf."
-                    placement_text = (
-                        f"Nozzle placed 690 to {_nh} mm above its section, aiming straight down. "
-                        f"{_pos_note}"
-                    )
+                        _pos_note = get_translation("position_nozzle_inner", lang, distance=_from_inner)
+                    placement_text = get_translation("range_nozzle_placement", lang, height=_nh, position=_pos_note)
                 else:
-                    placement_text = NOZZLE_PLACEMENT.get(appliance, "")
+                    placement_text = get_nozzle_placement(appliance, lang)
                 sections_block = ui.div(
                     {"class": "sections-neutral"},
                     ui.div(
                         {"class": "sections-neutral-title"},
-                        "1 section",
+                        f"1 {get_translation('section_singular', lang)}",
                     ),
                     ui.div() if abs_exceeded else ui.HTML(svg_html),
                     ui.div({"class": "sections-note"}, "  ·  ".join(ok_parts)),
@@ -405,14 +402,14 @@ def server(input, output, session):
                 if itype == "d":
                     abs_lim  = info.get("abs_max_dia")
                     abs_val  = vals.get("dia")
-                    abs_desc = f"Diameter {abs_val} mm exceeds maximum {abs_lim} mm"
+                    abs_desc = get_translation("abs_diameter_exceeds", lang, value=abs_val, limit=abs_lim)
                 elif info.get("abs_max_area") is not None and area_m2 is not None and area_m2 > info["abs_max_area"]:
                     abs_lim  = info["abs_max_area"]
-                    abs_desc = f"Area {area_m2:.4f} m² exceeds maximum {abs_lim} m²"
+                    abs_desc = get_translation("abs_area_exceeds", lang, value=area_m2, limit=abs_lim)
                 else:
                     abs_lim  = info.get("abs_max_width")
                     abs_val  = vals.get("width")
-                    abs_desc = f"Width {abs_val} mm exceeds maximum {abs_lim} mm"
+                    abs_desc = get_translation("abs_width_exceeds", lang, value=abs_val, limit=abs_lim)
                 abs_warning = ui.div(
                     {"style": "margin-top:8px; padding:10px 12px; background:rgba(227,0,15,0.18); "
                                "border:1.5px solid rgba(227,0,15,0.5); border-radius:4px;"},
@@ -424,7 +421,7 @@ def server(input, output, session):
                     ),
                     ui.div(
                         {"style": "font-size:12px; color:rgba(245,240,232,0.85); font-weight:500;"},
-                        f"The {appliance.lower()} cannot be protected."
+                        get_translation("cannot_be_protected", lang, appliance=appliance_label.lower()),
                     ),
                 )
             else:

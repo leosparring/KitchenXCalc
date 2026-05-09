@@ -256,6 +256,86 @@ TRANSLATIONS = {
         "no": "Ingen seksjonsoppsett kan tilfredsstille både hyllevinkelen og c-begrensningen. Reduser hylleutspring, øk hyllehøyde eller reduser apparatets dimensjoner.",
         "de": "Kein Abschnittslayout kann sowohl den Regalwinkel als auch die c-Beschränkung erfüllen. Reduzieren Sie den Regalüberhang, erhöhen Sie die Regalhöhe oder verringern Sie die Gerätemaße.",
     },
+    "grid": {
+        "en": "grid", "sv": "rutnät", "fi": "ruudukko", "no": "rutenett", "de": "Raster",
+    },
+    "max": {
+        "en": "Max", "sv": "Max", "fi": "Maks.", "no": "Maks", "de": "Max.",
+    },
+    "limit": {
+        "en": "Limit", "sv": "Gräns", "fi": "Raja", "no": "Grense", "de": "Grenze",
+    },
+    "cell_perimeter": {
+        "en": "Cell perimeter", "sv": "Cellomkrets", "fi": "Solun ympärysmitta", "no": "Celleomkrets", "de": "Zellenumfang",
+    },
+    "each_section": {
+        "en": "Each section", "sv": "Varje sektion", "fi": "Jokainen osio", "no": "Hver seksjon", "de": "Jeder Abschnitt",
+    },
+    "max_width": {
+        "en": "Max width", "sv": "Max bredd", "fi": "Maks. leveys", "no": "Maks bredde", "de": "Max. Breite",
+    },
+    "max_length": {
+        "en": "Max length", "sv": "Max längd", "fi": "Maks. pituus", "no": "Maks lengde", "de": "Max. Länge",
+    },
+    "max_area": {
+        "en": "Max area", "sv": "Max area", "fi": "Maks. pinta-ala", "no": "Maks areal", "de": "Max. Fläche",
+    },
+    "max_side": {
+        "en": "Max side", "sv": "Max sida", "fi": "Maks. sivu", "no": "Maks side", "de": "Max. Seite",
+    },
+    "area": {
+        "en": "Area", "sv": "Area", "fi": "Pinta-ala", "no": "Areal", "de": "Fläche",
+    },
+    "distance_limit": {
+        "en": "Distance limit", "sv": "Avståndsgräns", "fi": "Etäisyysraja", "no": "Avstandsgrense", "de": "Abstandsgrenze",
+    },
+    "upper_row": {
+        "en": "Upper row", "sv": "Övre rad", "fi": "Ylärivi", "no": "Øvre rad", "de": "Obere Reihe",
+    },
+    "upper_rows": {
+        "en": "Upper {count} rows", "sv": "Övre {count} rader", "fi": "Ylemmät {count} riviä", "no": "Øvre {count} rader", "de": "Obere {count} Reihen",
+    },
+    "bottom_row_drip": {
+        "en": "Bottom row (drip)", "sv": "Nedre rad (dropp)", "fi": "Alarivi (tippa)", "no": "Nedre rad (drypp)", "de": "Untere Reihe (Tropfbereich)",
+    },
+    "position_nozzle_center": {
+        "en": "Position the nozzle centrally above its section.",
+        "sv": "Placera munstycket centrerat ovanför sin sektion.",
+        "fi": "Sijoita suutin keskelle osion yläpuolelle.",
+        "no": "Plasser dysen sentrert over seksjonen.",
+        "de": "Positionieren Sie die Düse mittig über ihrem Abschnitt.",
+    },
+    "position_nozzle_inner": {
+        "en": "Position the nozzle {distance} mm from the inner (back) edge of the section to maintain line of sight past the shelf.",
+        "sv": "Placera munstycket {distance} mm från sektionens inre (bakre) kant för att behålla fri sikt förbi hyllan.",
+        "fi": "Sijoita suutin {distance} mm osion sisäreunasta (takareunasta), jotta näkölinja hyllyn ohi säilyy.",
+        "no": "Plasser dysen {distance} mm fra seksjonens indre (bakre) kant for å beholde fri sikt forbi hyllen.",
+        "de": "Positionieren Sie die Düse {distance} mm von der inneren (hinteren) Abschnittskante entfernt, damit die Sichtlinie am Regal vorbei frei bleibt.",
+    },
+    "position_nozzle_inner_row": {
+        "en": "Position the innermost row of nozzles {distance} mm from the inner (back) edge of the section to maintain line of sight past the shelf. All other nozzles should be placed centrally above their section.",
+        "sv": "Placera den innersta raden munstycken {distance} mm från sektionens inre (bakre) kant för att behålla fri sikt förbi hyllan. Alla andra munstycken ska placeras centrerat ovanför sin sektion.",
+        "fi": "Sijoita sisin suutinten rivi {distance} mm osion sisäreunasta (takareunasta), jotta näkölinja hyllyn ohi säilyy. Muut suuttimet sijoitetaan keskelle oman osionsa yläpuolelle.",
+        "no": "Plasser den innerste raden med dyser {distance} mm fra seksjonens indre (bakre) kant for å beholde fri sikt forbi hyllen. Alle andre dyser skal plasseres sentrert over sin seksjon.",
+        "de": "Positionieren Sie die innerste Düsenreihe {distance} mm von der inneren (hinteren) Abschnittskante entfernt, damit die Sichtlinie am Regal vorbei frei bleibt. Alle anderen Düsen sollten mittig über ihrem Abschnitt platziert werden.",
+    },
+    "range_nozzle_placement": {
+        "en": "Nozzle placed 690 to {height} mm above its section, aiming straight down. {position}",
+        "sv": "Munstycke placerat 690 till {height} mm ovanför sin sektion, riktat rakt nedåt. {position}",
+        "fi": "Suutin sijoitetaan 690-{height} mm osion yläpuolelle ja suunnataan suoraan alas. {position}",
+        "no": "Dyse plasseres 690 til {height} mm over seksjonen, rettet rett ned. {position}",
+        "de": "Düse 690 bis {height} mm über ihrem Abschnitt platzieren, gerade nach unten ausrichten. {position}",
+    },
+    "abs_diameter_exceeds": {
+        "en": "Diameter {value} mm exceeds maximum {limit} mm", "sv": "Diameter {value} mm överstiger max {limit} mm", "fi": "Halkaisija {value} mm ylittää maksimin {limit} mm", "no": "Diameter {value} mm overstiger maks {limit} mm", "de": "Durchmesser {value} mm überschreitet Maximum {limit} mm",
+    },
+    "abs_area_exceeds": {
+        "en": "Area {value:.4f} m² exceeds maximum {limit} m²", "sv": "Area {value:.4f} m² överstiger max {limit} m²", "fi": "Pinta-ala {value:.4f} m² ylittää maksimin {limit} m²", "no": "Areal {value:.4f} m² overstiger maks {limit} m²", "de": "Fläche {value:.4f} m² überschreitet Maximum {limit} m²",
+    },
+    "abs_width_exceeds": {
+        "en": "Width {value} mm exceeds maximum {limit} mm", "sv": "Bredd {value} mm överstiger max {limit} mm", "fi": "Leveys {value} mm ylittää maksimin {limit} mm", "no": "Bredde {value} mm overstiger maks {limit} mm", "de": "Breite {value} mm überschreitet Maximum {limit} mm",
+    },
+
 }
 
 APPLIANCE_LABELS = {
@@ -317,10 +397,96 @@ APPLIANCE_LABELS = {
 }
 
 
+
+NOZZLE_PLACEMENT_LABELS = {
+    "Fryer": {
+        "en": "Nozzle placed 690 to 1200 mm above the top of its section, aiming at the section center.",
+        "sv": "Munstycke placeras 690 till 1200 mm ovanför sektionens ovansida och riktas mot sektionens centrum.",
+        "fi": "Suutin sijoitetaan 690-1200 mm osion yläpuolelle ja suunnataan osion keskelle.",
+        "no": "Dyse plasseres 690 til 1200 mm over toppen av seksjonen og rettes mot seksjonens sentrum.",
+        "de": "Düse 690 bis 1200 mm über der Oberkante des Abschnitts platzieren und auf die Abschnittsmitte ausrichten.",
+    },
+    "Fryer with drip board": {
+        "en": "Nozzle placed 690 to 1200 mm above the top of its section, aiming at the section center.",
+        "sv": "Munstycke placeras 690 till 1200 mm ovanför sektionens ovansida och riktas mot sektionens centrum.",
+        "fi": "Suutin sijoitetaan 690-1200 mm osion yläpuolelle ja suunnataan osion keskelle.",
+        "no": "Dyse plasseres 690 til 1200 mm over toppen av seksjonen og rettes mot seksjonens sentrum.",
+        "de": "Düse 690 bis 1200 mm über der Oberkante des Abschnitts platzieren und auf die Abschnittsmitte ausrichten.",
+    },
+    "Wok": {
+        "en": "Nozzle placed 690 to 1200 mm above the wok, aiming at the center.",
+        "sv": "Munstycke placeras 690 till 1200 mm ovanför woken och riktas mot centrum.",
+        "fi": "Suutin sijoitetaan 690-1200 mm wokin yläpuolelle ja suunnataan keskelle.",
+        "no": "Dyse plasseres 690 til 1200 mm over woken og rettes mot sentrum.",
+        "de": "Düse 690 bis 1200 mm über dem Wok platzieren und auf die Mitte ausrichten.",
+    },
+    "Tilt skillet": {
+        "en": "Nozzle placed 690 to 1200 mm above its section, aiming at the section center. Position should be at the front so that there is a clear line from the nozzle to the entire hazard area with the lid in open position.",
+        "sv": "Munstycke placeras 690 till 1200 mm ovanför sin sektion och riktas mot sektionens centrum. Placeringen ska vara framtill så att det finns fri sikt från munstycket till hela riskytan med locket öppet.",
+        "fi": "Suutin sijoitetaan 690-1200 mm osion yläpuolelle ja suunnataan osion keskelle. Sijoitus tehdään etureunaan, jotta suuttimelta on vapaa näkölinja koko riskialueelle kannen ollessa auki.",
+        "no": "Dyse plasseres 690 til 1200 mm over seksjonen og rettes mot seksjonens sentrum. Plasseringen skal være foran slik at det er fri sikt fra dysen til hele fareområdet med lokket åpent.",
+        "de": "Düse 690 bis 1200 mm über dem Abschnitt platzieren und auf die Abschnittsmitte ausrichten. Die Position sollte vorne liegen, damit bei geöffnetem Deckel eine freie Sichtlinie von der Düse zum gesamten Gefahrenbereich besteht.",
+    },
+    "Griddle": {
+        "en": "Nozzle placed 760 to 1020 mm above its section, 0 to 50 mm from the edge, aiming at the section center.",
+        "sv": "Munstycke placeras 760 till 1020 mm ovanför sin sektion, 0 till 50 mm från kanten, riktat mot sektionens centrum.",
+        "fi": "Suutin sijoitetaan 760-1020 mm osion yläpuolelle, 0-50 mm reunasta, ja suunnataan osion keskelle.",
+        "no": "Dyse plasseres 760 til 1020 mm over seksjonen, 0 til 50 mm fra kanten, rettet mot seksjonens sentrum.",
+        "de": "Düse 760 bis 1020 mm über dem Abschnitt platzieren, 0 bis 50 mm von der Kante entfernt, auf die Abschnittsmitte ausrichten.",
+    },
+    "Gas or electric broiler": {
+        "en": "Nozzle placed 500 to 1020 mm above its section, aiming at the section center.",
+        "sv": "Munstycke placeras 500 till 1020 mm ovanför sin sektion och riktas mot sektionens centrum.",
+        "fi": "Suutin sijoitetaan 500-1020 mm osion yläpuolelle ja suunnataan osion keskelle.",
+        "no": "Dyse plasseres 500 til 1020 mm over seksjonen og rettes mot seksjonens sentrum.",
+        "de": "Düse 500 bis 1020 mm über dem Abschnitt platzieren und auf die Abschnittsmitte ausrichten.",
+    },
+    "Range top": {
+        "en": "Nozzle placed centrally 690 to 1020 mm above its section, aiming straight down. If there is a shelf, ensure there is a clear line from the nozzle to the entire surface area.",
+        "sv": "Munstycke placeras centrerat 690 till 1020 mm ovanför sin sektion och riktas rakt nedåt. Om det finns en hylla, säkerställ fri sikt från munstycket till hela ytan.",
+        "fi": "Suutin sijoitetaan keskelle 690-1020 mm osion yläpuolelle ja suunnataan suoraan alas. Jos hylly on käytössä, varmista vapaa näkölinja suuttimelta koko pinta-alalle.",
+        "no": "Dyse plasseres sentrert 690 til 1020 mm over seksjonen og rettes rett ned. Hvis det finnes en hylle, må det være fri sikt fra dysen til hele overflaten.",
+        "de": "Düse mittig 690 bis 1020 mm über dem Abschnitt platzieren und gerade nach unten ausrichten. Falls ein Regal vorhanden ist, eine freie Sichtlinie von der Düse zur gesamten Fläche sicherstellen.",
+    },
+    "Plenum": {
+        "en": "Nozzle placed maximum 150 mm from the start of the plenum, 50 to 100 mm from the filters, aiming horizontally. For multiple nozzles, they must aim in the same direction with linear separation of maximum 3 m.",
+        "sv": "Munstycke placeras maximalt 150 mm från plenumets början, 50 till 100 mm från filtren, riktat horisontellt. Vid flera munstycken ska de riktas åt samma håll med högst 3 m linjärt avstånd.",
+        "fi": "Suutin sijoitetaan enintään 150 mm plenumosan alusta, 50-100 mm suodattimista, ja suunnataan vaakasuoraan. Useiden suutinten tulee osoittaa samaan suuntaan enintään 3 m lineaarisella etäisyydellä.",
+        "no": "Dyse plasseres maksimalt 150 mm fra starten av plenumet, 50 til 100 mm fra filtrene, rettet horisontalt. Ved flere dyser skal de rettes samme vei med maksimal lineær avstand på 3 m.",
+        "de": "Düse maximal 150 mm vom Beginn des Plenums und 50 bis 100 mm von den Filtern entfernt platzieren, horizontal ausrichten. Mehrere Düsen müssen in dieselbe Richtung zeigen, mit maximal 3 m linearem Abstand.",
+    },
+    "Plenum V-style": {
+        "en": "Nozzle placed maximum 150 mm from the start of the plenum, 50 to 100 mm from the filters, aiming horizontally. For multiple nozzles, they must aim in the same direction with linear separation of maximum 3 m.",
+        "sv": "Munstycke placeras maximalt 150 mm från plenumets början, 50 till 100 mm från filtren, riktat horisontellt. Vid flera munstycken ska de riktas åt samma håll med högst 3 m linjärt avstånd.",
+        "fi": "Suutin sijoitetaan enintään 150 mm plenumosan alusta, 50-100 mm suodattimista, ja suunnataan vaakasuoraan. Useiden suutinten tulee osoittaa samaan suuntaan enintään 3 m lineaarisella etäisyydellä.",
+        "no": "Dyse plasseres maksimalt 150 mm fra starten av plenumet, 50 til 100 mm fra filtrene, rettet horisontalt. Ved flere dyser skal de rettes samme vei med maksimal lineær avstand på 3 m.",
+        "de": "Düse maximal 150 mm vom Beginn des Plenums und 50 bis 100 mm von den Filtern entfernt platzieren, horizontal ausrichten. Mehrere Düsen müssen in dieselbe Richtung zeigen, mit maximal 3 m linearem Abstand.",
+    },
+    "Circular duct": {
+        "en": "Nozzle placed centrally in its section, 50 to 200 mm into the duct, aiming straight up.",
+        "sv": "Munstycke placeras centrerat i sin sektion, 50 till 200 mm in i kanalen, riktat rakt uppåt.",
+        "fi": "Suutin sijoitetaan keskelle osiota, 50-200 mm kanavan sisään, ja suunnataan suoraan ylöspäin.",
+        "no": "Dyse plasseres sentrert i seksjonen, 50 til 200 mm inn i kanalen, rettet rett opp.",
+        "de": "Düse mittig im Abschnitt platzieren, 50 bis 200 mm in den Kanal hinein, gerade nach oben ausrichten.",
+    },
+    "Rectangular duct": {
+        "en": "Nozzle placed centrally in its section, 50 to 200 mm into the duct, aiming straight up.",
+        "sv": "Munstycke placeras centrerat i sin sektion, 50 till 200 mm in i kanalen, riktat rakt uppåt.",
+        "fi": "Suutin sijoitetaan keskelle osiota, 50-200 mm kanavan sisään, ja suunnataan suoraan ylöspäin.",
+        "no": "Dyse plasseres sentrert i seksjonen, 50 til 200 mm inn i kanalen, rettet rett opp.",
+        "de": "Düse mittig im Abschnitt platzieren, 50 bis 200 mm in den Kanal hinein, gerade nach oben ausrichten.",
+    },
+}
+
 def get_translation(key, lang, **kwargs):
     text = TRANSLATIONS.get(key, {}).get(lang) or TRANSLATIONS.get(key, {}).get("en") or key
     return text.format(**kwargs) if kwargs else text
 
+
+
+def get_nozzle_placement(appliance, lang):
+    labels = NOZZLE_PLACEMENT_LABELS.get(appliance, {})
+    return labels.get(lang) or labels.get("en") or ""
 
 def get_appliance_label(appliance, lang):
     return APPLIANCE_LABELS.get(lang, {}).get(appliance, APPLIANCE_LABELS["en"].get(appliance, appliance))

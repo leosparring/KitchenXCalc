@@ -65,6 +65,14 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(feasible[4], 1)
         self.assertIsNone(infeasible)
 
+    def test_range_top_without_shelf_inputs_calculates_display_case(self):
+        vals = {"width": 500, "depth": 700, "shelf_height": None, "shelf_overhang": None, "qty": 1}
+
+        calc = calculate_slot("Range top", vals, APPLIANCES)
+
+        self.assertIsNotNone(calc)
+        self.assertGreaterEqual(calc["n_sections"], 1)
+
     def test_summary_uses_shared_slot_calculation(self):
         vals = {"width": 900, "depth": 900, "qty": 2}
 
